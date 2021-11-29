@@ -17,6 +17,8 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
+var GitCommit string
+
 //Struct to provide to golang template
 type tfTopic struct {
 	Name       string
