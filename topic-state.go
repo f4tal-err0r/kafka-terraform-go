@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/spf13/cobra"
 )
 
 //Struct to provide to golang template
@@ -138,35 +137,30 @@ func getTopicMetadata(ac *kafka.AdminClient, t string) string {
 }
 
 func main() {
-	var topic, cluster string
 
-	var rootCmd = &cobra.Command{
-		Use:   "Kafka Topics Terraform Sync",
-		Long: "Usage: topic-state <kafka-server:port>",
-		Run: func(cmd *cobra.Command, args []string) {
-			if cluster == "" {
-				cmd.Help()
-				os.Exit(5)
-			}
-			//Create AdminClient
-			ac, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.		servers": cluster})
-			if err != nil {
-				fmt.Printf("Failed to create Admin client: %s\n", err)
-				os.Exit(1)
-			}
-			if topic == ""{
-				topics := getTopics(ac)
-				for _, t := range topics {
-					fmt.Print(getTopicMetadata(ac, t))
-				}
-			} else {
-				fmt.Print(getTopicMetadata(ac, topic))
-			}
-		  },
-		}
-	
-	rootCmd.PersistentFlags().StringVarP(&cluster, "", "", "", "Cluster address")
-    rootCmd.PersistentFlags().StringVarP(&topic, "topic", "t", "", "Name of single topic to generate")
+	//Error handling in case an argument isnt provided.
+	if len(os.Args) != 2 {
+		fmt.Fprintf(os.Stderr,
+			"Kafka Topics Terraform Sync\n"+
+			"Version: %s"+
+			"\n"+
+			"Usage: %s <kafka-server:port>",
+			GitCommit,
+			os.Args[0])
+		os.Exit(2)
+	}
 
-	rootCmd.Execute()
+	cluster := os.Args[1]
+
+	//Create AdminClient
+	ac, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.servers": cluster})
+	if err != nil {
+		fmt.Printf("Failed to create Admin client: %s\n", err)
+		os.Exit(1)
+	}
+
+	topics := getTopics(ac)
+	for _, t := range topics {
+		fmt.Print(getTopicMetadata(ac, t))
+	}
 }
