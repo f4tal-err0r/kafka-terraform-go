@@ -66,7 +66,7 @@ func TestTemplate(t *testing.T) {
 
 	test_topic_1 := getTopicMetadata(ac, "Test_Topic")
 	if !reflect.DeepEqual(strings.Fields(test_topic_1), strings.Fields(test1)) {
-		t.Errorf("ERROR: Mismatch in Test_Topic2 generated function template and test case\nGenerated:\n%s\nExpected:\n%s", test_topic_1, test1)
+		t.Errorf("ERROR: Mismatch in Test_Topic generated function template and test case\nGenerated:\n%s\nExpected:\n%s", test_topic_1, test1)
 	}
 
 	test_topic_2 := getTopicMetadata(ac, "Test_Topic2")
