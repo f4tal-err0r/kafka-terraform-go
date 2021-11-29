@@ -1,0 +1,41 @@
+version: '2'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.1.1
+    ports:
+      - "2181:2181"
+    expose:
+        - '2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  # reachable on 9092 from the host and on 29092 from inside docker compose
+  kafka:
+    image: confluentinc/cp-kafka:6.1.1
+    depends_on:
+      - zookeeper
+    ports:
+      - '9092:9092'
+    expose:
+      - '29092'
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_MIN_INSYNC_REPLICAS: '1'
+
+
+  init-kafka:
+    image: confluentinc/cp-kafka:6.1.1
+    depends_on:
+      - kafka
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Test_Topic --replication-factor 1 --partitions 12 --config retention.ms=259200000 --config unclean.leader.election.enable=false --config segment.bytes=1073741824 --config compression.type=producer
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Test_Topic2 --replication-factor 1 --partitions 21 --config retention.ms=604800000 --config unclean.leader.election.enable=true --config segment.bytes=105314687 --config compression.type=snappy
+
+      "
