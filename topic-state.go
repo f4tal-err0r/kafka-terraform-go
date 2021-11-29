@@ -6,13 +6,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"sort"
 	"text/template"
 	"time"
-	"bytes"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -34,14 +34,13 @@ func sortTopics(s []string) []string {
 	sort.Strings(s)
 
 	for _, str := range s {
-		//Check if string is empty or starts with "__". 
-		if str != "" && ! (len(str) >= len("__") && str[0:len("__")] == "__") { 
+		//Check if string is empty or starts with "__".
+		if str != "" && !(len(str) >= len("__") && str[0:len("__")] == "__") {
 			r = append(r, str)
 		}
 	}
 	return r
 }
-
 
 func ReplFactor(c *kafka.TopicMetadata) int {
 	var r int
@@ -79,7 +78,7 @@ func tmpl(data *tfTopic) string {
 }
 
 func getTopics(ac *kafka.AdminClient) []string {
-	//Get list of all topics and number of partitions 
+	//Get list of all topics and number of partitions
 	topicList, err := ac.GetMetadata(nil, true, 20000)
 	if err != nil {
 		fmt.Printf("Failed to GetMetadata: %s\n", err)
@@ -145,9 +144,9 @@ func main() {
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr,
 			"Kafka Topics Terraform Sync\n"+
-			"Commit ID: %s"+
-			"\n"+
-			"Usage: %s <kafka-server:port>",
+				"Commit ID: %s"+
+				"\n"+
+				"Usage: %s <kafka-server:port>",
 			GitCommit,
 			os.Args[0])
 		os.Exit(2)
